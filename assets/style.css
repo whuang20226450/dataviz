@@ -1,0 +1,19 @@
+/* body {
+    background-color: rgb(63, 191, 208);
+} */
+
+
+/* 'margin': 'auto' */
+
+
+.DateInput_input {
+    font-size: 15px;
+    text-align: center;
+    
+    height: 35px;
+}
+
+.popover {
+    max-width: 500px;
+}
+
