@@ -10,7 +10,7 @@ external_stylesheets = [dbc.themes.BOOTSTRAP]
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 # inferences_fake/figs_fake should be generated from elsewhere
-inferences_fake = ['High correlation between your most productive days and more than 7 hours of sleep', 'High correlation between your least productive days and high amount of phone use', 'c']
+inferences_fake = ['High correlation between your most productive days and more than 7 hours of sleep', 'High correlation between your least productive days and high amount of phone use']
 figs_fake = [plot_fig.main_fig]*3
 inferences_dash_list = []
 for idx, (inference, fig) in enumerate(zip(inferences_fake, figs_fake)):
@@ -35,7 +35,7 @@ for idx, (inference, fig) in enumerate(zip(inferences_fake, figs_fake)):
     inferences_dash_list.append(div)
 
 
-graph_types=['Weekly Productivity', 'Monthly Productivity', 'Activity Analysis', 'Daily Key Metrics (S+A) Levels', 'Weekly Key Metrics (S+A) Levels']
+graph_types=['Weekly Productivity', 'Monthly Productivity', 'Activity Analysis', 'Weekly Key Metrics (S+A) Levels']
 comparison_types=['Self', 'All users', 'Best users', 'Worst users']
 
 
@@ -128,20 +128,13 @@ app.layout = html.Div(
                     align='center',
                 ),
 
-                # two plots
+                # plots
                 dbc.Row(
-                    [
-                        dbc.Col(
-                            dcc.Graph(id='main-fig', figure=plot_fig.plot_main('Weekly Productivity', 'Self', datetime.date(2023,5,4))),
-                            width=6,
-                        ),
-                        dbc.Col(
-                            dcc.Graph(id='sub-fig', figure=plot_fig.main_fig),
-                            width=6,
-                        ),
-                    ],
+                    "",
                     style={"height": "70vh"},
                     align="center",
+                    justify="center",
+                    id='figs',
                 ),
 
                 # inference
@@ -172,14 +165,14 @@ def toggle_collapse(n):
 
 
 
-# for main plot
+# for plots
 @app.callback(
-    Output("main-fig", "figure"),
+    Output("figs", "children"),
     Input("graph-select", "value"),
     Input("comparison-select", "value"),
     Input("startDate-select", "date"),
 )
-def plot1(graph_type, comparison_type, start_date):
+def fig_callback(graph_type, comparison_type, start_date):
     fig = plot_fig.plot_main(graph_type, comparison_type, date.fromisoformat(start_date))
     return fig
 
@@ -192,7 +185,7 @@ def plot1(graph_type, comparison_type, start_date):
     Input("comparison-select", "value"),
     Input("startDate-select", "date"),
 )
-def plot1(graph_type, comparison_type, start_date):
+def popover_callback(graph_type, comparison_type, start_date):
 
     if graph_type == graph_types[0]:
         body = 'In this plot, x-axis represents the 7 days of the week. On the y-axis, the function y = 1/(work time) is plotted.'

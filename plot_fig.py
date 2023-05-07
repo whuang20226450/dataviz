@@ -4,6 +4,8 @@ import numpy as np
 import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import dash_bootstrap_components as dbc
+from dash import dcc, html, Dash
 
 
 #-------------------------------------------------------------fake data--------------------------------------------------#
@@ -21,51 +23,60 @@ sub_fig=px.scatter(gapminder_df, x='co2', y='gdp')
 
 # fake data for productivity plot
 productivity_fake = np.random.rand(31).tolist()
+productivity_diff_fake = np.random.rand(31).tolist()
 productivity_other_fake = np.random.rand(31).tolist()
 week_day = ['Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat', 'Sun']
-df_fake = pd.DataFrame(data={'productivity': productivity_fake, 'productivity_other': productivity_other_fake, 'week_day': (week_day*5)[:31]})
+df_fake = pd.DataFrame(data={'productivity': productivity_fake, 'productivity_diff': productivity_diff_fake, 'productivity_other': productivity_other_fake, 'week_day': (week_day*5)[:31]})
 
 # fake data for activity plot
 activity_type = ['Social', 'Entertainment', 'Work', 'Rest', 'Exercise', 'Other']
-activity_time = ['3','5','2','8','1','5']
-activity_detail_fake = ['yt', 'netflix', 'LOL', 'Shopping']
-activity_detail_fake_time = ['3','5','2','8']
+activity_time = [3,5,2,8,1,5]
+activity_time2 = [8,1,5,3,5,2,]
+activity_detail_type_fake = ['yt', 'netflix', 'LOL', 'Shopping']
+activity_detail_time_fake = ['3','5','2','8']
+df_fake3 = pd.DataFrame(data={'activity_type': activity_type, 'activity_time': activity_time, 'activity_time2': activity_time2})
+df_fake3_2 = pd.DataFrame(data={'activity_detail_type': activity_detail_type_fake, 'activity_detail_time': activity_detail_time_fake})
 
 # fake data for weekly key metrics (S+A)
 stress_fake = [3, 1, 2, 3, 1, -2, -3]
 attention_fake = [0, 2, 3, 2, 1, 2, 1]
-df_fake2 = pd.DataFrame(data={'stress': stress_fake, 'attention': attention_fake, 'week_day': week_day})
+stress_fake2 = [3, 1, -2, -3, 3, 1, 2]
+attention_fake2 = [1, 2, 1, 0, 2, 3, 2, ]
+df_fake2 = pd.DataFrame(data={'stress': stress_fake, 'attention': attention_fake, 'stress_other': stress_fake2, 'attention_other': attention_fake2, 'week_day': week_day})
 #-------------------------------------------------------------fake data--------------------------------------------------#
 
 
 def plot_main(graph_type, comparison_type, start_date):
     if graph_type == "Weekly Productivity":
-        fig = weekly_productivity_barplot(df_fake, comparison_type, start_date)
+        fig1 = weekly_productivity_plot(df_fake, comparison_type, start_date)
+        fig2 = None
     elif graph_type == "Monthly Productivity":
-        fig = calendar_heatmap(df_fake, start_date)
+        fig1, fig2 = monthly_productivity_plot(df_fake, comparison_type, start_date)
     elif graph_type == "Activity Analysis":
-        fig = interactive_pie_chart(activity_type, activity_time)
-    elif graph_type == "Daily Key Metrics (S+A) Levels":
-        pass
+        fig1, fig2 = activity_analysis_plot(comparison_type, start_date, df_fake3, df_fake3_2)
     elif graph_type == "Weekly Key Metrics (S+A) Levels":
-        fig = key_metrics_plot(week_day, stress_fake, attention_fake, start_date)
+        fig1 = key_metrics_plot(comparison_type, start_date, df_fake2)
+        fig2 = None
     
-    return fig
+    # Fix the glitch of fig1 when switching form no fig2 to fig2 showing
+    if (comparison_type == 'Self') or (fig2 is None):
+        figs = [dbc.Col( dcc.Graph(figure=fig1), width=8)]
+    else:
+        figs = [dbc.Col( dcc.Graph(figure=fig1), width=6), dbc.Col(dcc.Graph(figure=fig2),width=6)]
+
+    return figs
 
 
 # Note: somehow the end is included for df.loc[], eg. df.loc[:6] -> row 0~6 are included
-def weekly_productivity_barplot(df, comparison_type, start_date):
+def weekly_productivity_plot(df, comparison_type, start_date):
     fig=go.Figure()
     
     fig.add_traces(go.Bar(name='Self', x=df.week_day, y=df.loc[:6].productivity, marker_color='#66C5CC'))
-
     if comparison_type != 'Self':
         fig.add_traces(go.Bar(name=comparison_type, x=df.week_day, y=df.loc[:6].productivity_other, marker_color='#F6CF71'))
 
-
-
     fig.update_layout(
-        title=f'Weekly Productivity starting from {start_date}',
+        title=f'<B>Weekly Productivity</B> compared with {comparison_type} starting from {start_date}',
         hovermode='x',
         plot_bgcolor='white',
     )
@@ -83,17 +94,26 @@ def weekly_productivity_barplot(df, comparison_type, start_date):
         linewidth=1,
     )
 
-    if comparison_type != 'Self':
+    if comparison_type == 'Self':
         fig.update_layout(
-            title=f'Weekly Productivity compared with {comparison_type}<Br>starting from {start_date}'
+            title=f'<B>Weekly Productivity</B> starting from {start_date}',
         )
     return fig
 
 
+def monthly_productivity_plot(df, comparison_type, start_date):
+    fig1 = calendar_heatmap(df.productivity.values.tolist(), start_date, 
+        f'<B>Monthly Productivity</B> from {str(start_date)}')
+
+    fig2 = calendar_heatmap(df.productivity_diff.values.tolist(), start_date, 
+        f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
+
+    return fig1, fig2
+
 # this function is slightly modified from the internet, whoever in charge plz modify it and make it diff from the ori version
 # see the following link to see comment of the code
 # https://community.plotly.com/t/colored-calendar-heatmap-in-dash/10907/7
-def calendar_heatmap(df, start_date):
+def calendar_heatmap(data, start_date, title):
 
     end_date = start_date + datetime.timedelta(30)
 
@@ -112,10 +132,10 @@ def calendar_heatmap(df, start_date):
     selected_dates = [Mon_of_start_date + datetime.timedelta(i) for i in range(selected_dates_count)]
     weekdays_of_selected_dates = [i.weekday() for i in selected_dates]   
     weeknumber_of_selected_dates = [int(i.strftime("%V")) for i in selected_dates]
-    productivity_fake = [0]*missing_front + df.productivity.values.tolist() + [0]*missing_back
+    productivity_fake = [0]*missing_front + data + [0]*missing_back
     text = [str(i)+"   Productivity: "+str(np.round(j,2)) for i, j in zip(selected_dates, productivity_fake)]
 
-    data = [
+    plot_data = [
         go.Heatmap(
             x = weekdays_of_selected_dates,
             y = weeknumber_of_selected_dates,
@@ -129,7 +149,7 @@ def calendar_heatmap(df, start_date):
         )
     ]
     layout = go.Layout(
-        title=f'Monthly Productivity from {str(start_date)}',
+        title=title,
         xaxis=dict(
             tickmode="array",
             ticktext=['Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat', 'Sun'],
@@ -140,14 +160,21 @@ def calendar_heatmap(df, start_date):
         ),
         plot_bgcolor=('rgb(255,255,255)') # making grid appear white
     )
+    fig = go.Figure(data=plot_data, layout=layout)
 
-    fig = go.Figure(data=data, layout=layout)
     return fig
 
 
-def interactive_pie_chart(activity_type, activity_time):
+def activity_analysis_plot(comparison_type, start_date, df, df2):
+    
+    activity_type = df.activity_type
+    activity_time = df.activity_time
+    activity_time2 = df.activity_time2
+    activity_detail_type_fake = df2.activity_detail_type
+    activity_detail_time_fake = df2.activity_detail_time
 
-    fig = go.Figure(data=[go.Pie(labels=activity_type, values=activity_time, pull=[0.2, 0, 0, 0, 0, 0], title='Social highlighted')])
+    # fig1
+    fig1 = go.Figure(data=[go.Pie(labels=activity_type, values=activity_time, pull=[0.2, 0, 0, 0, 0, 0], title='Social highlighted')])
 
     m1, m2 = 50, 80
     btn_list = []
@@ -166,9 +193,9 @@ def interactive_pie_chart(activity_type, activity_time):
                 ],
                 args2 = [
                     {
-                        'labels': [activity_detail_fake], 
-                        'values': [activity_detail_fake_time], 
-                        'pull': [[0. for i in range(len(activity_detail_fake))]],
+                        'labels': [activity_detail_type_fake], 
+                        'values': [activity_detail_time_fake], 
+                        'pull': [[0. for i in range(len(activity_detail_type_fake))]],
                         'title': f'{activity} detail',
                     }, 
                     {'margin': dict(t=m2, b=m2, l=m2, r=m2*1.9)}
@@ -176,7 +203,7 @@ def interactive_pie_chart(activity_type, activity_time):
             ),
         )
 
-    fig.update_layout(
+    fig1.update_layout(
         updatemenus = list([dict(
             type="buttons",
             buttons=btn_list,
@@ -194,18 +221,44 @@ def interactive_pie_chart(activity_type, activity_time):
         )]),
         margin=dict(t=m1, b=m1, l=m1, r=m1),
         title = {
-            'text':'Activity analysis',
+            'text':f'<B>Activity Analysis</B> compared with {comparison_type} on {start_date}',
         }
     )
-    return fig
+
+    # fig2
+    fig2=go.Figure()
+    
+    fig2.add_traces(go.Bar(name='Self', x=activity_type, y=activity_time, marker_color='#66C5CC'))
+    fig2.add_traces(go.Bar(name=comparison_type, x=activity_type, y=activity_time2, marker_color='#F6CF71'))
+
+    fig2.update_layout(
+        title=f'<B>Activity Analysis</B> compared with {comparison_type} on {start_date}',
+        hovermode='x',
+        plot_bgcolor='white',
+    )
+    fig2.update_xaxes(
+        ticks='outside',
+        showline=True,      # axis show or not
+        linecolor='black',  # axis line color
+        linewidth=1,        # axis thickness
+    )
+    fig2.update_yaxes(
+        title_text="stress level",
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        linewidth=1,
+    )
+
+    return fig1, fig2
 
 
-def key_metrics_plot(week_day, stress_fake, attention_fake, start_date):
+def key_metrics_plot(comparison_type, start_date, df):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     fig.add_trace(
         # <extra></extra> is used to remove legend shown while hovering
-        go.Scatter(x=week_day, y=stress_fake, name="stress level", 
+        go.Scatter(x=df.week_day, y=df.stress, name="stress level", 
             hovertemplate='Stress level: %{y}<extra></extra>',
             line=dict(color='rgb(206, 0, 0)'),
         ),
@@ -213,12 +266,29 @@ def key_metrics_plot(week_day, stress_fake, attention_fake, start_date):
     )
 
     fig.add_trace(
-        go.Scatter(x=week_day, y=attention_fake, name="attention level", 
+        go.Scatter(x=df.week_day, y=df.attention, name="attention level", 
             hovertemplate='Attention level: %{y}<extra></extra>',
             line=dict(color='rgb(0, 1, 255)'),
         ),
         secondary_y=True,
     )
+
+    if comparison_type != 'Self':
+        fig.add_trace(
+            go.Scatter(x=df.week_day, y=df.stress_other, name="Others\'stress level", 
+                hovertemplate='Others\'Stress level: %{y}<extra></extra>',
+                line=dict(color='rgb(206, 0, 0)', dash='dot'),
+            ),
+            secondary_y=False,
+        )
+        fig.add_trace(
+            go.Scatter(x=df.week_day, y=df.attention_other, name="Others\'attention level", 
+                hovertemplate='Others\' Attention level: %{y}<extra></extra>',
+                line=dict(color='rgb(0, 1, 255)', dash='dot'),
+            ),
+            secondary_y=True,
+        )
+
 
     fig.update_layout(
         title_text=f"Weekly Key Metrics (S+A) Levels starting from {start_date}",
