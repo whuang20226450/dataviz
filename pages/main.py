@@ -8,6 +8,7 @@ import pandas as pd
 import os
 import dash_bootstrap_components as dbc
 import plotly.figure_factory as ff
+from dash import callback
 
 
 
@@ -40,7 +41,7 @@ navigationModal = dbc.Modal([
             dbc.ModalBody([
                 dcc.Link('Go to Use page', href='/page1'),
                 html.Br(),
-                dcc.Link('Go to Analysis page', href='/page2')
+                dcc.Link('Go to Analysis page', href='/analysis')
             ]),
             dbc.ModalFooter(
                 dbc.Button("Close", id="close", className="ml-auto")
@@ -74,44 +75,50 @@ modal = dbc.Modal(
 
 
 
-app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
+# app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = html.Div(
-    children = [
+layout = dbc.Container([
         html.Div(
-            className = "content",
-            children=[
-                html.Header(
-                    style={'color':'#7FDBFF'},
-                ),
-                
-                dcc.Dropdown(
-                            id="picked_day",
-                            options=[                  
-                                    {'label': 'Today', 'value': 29},
-                                    {'label': 'Yesterday', 'value': 30},
-                            ],
-                            value = 29
-                ),
-                html.Div(dcc.Graph(id='heatmap'),
-                         style={'padding-left':'0px', 'width':'100%'}),
-                html.Div(dcc.Graph(id='routine',
-                                #    hoverData={'points': [{'pointNumber': None}]}
-                                   ),
-                         style={'width':'100%'},
-                         ),
-                modal,
-                dbc.Row(
-                    dbc.Col(dbc.Button("Other Pages", id="open"), className="text-right", width=12),
-                    justify="end"
-                ),
-                navigationModal
-            ]
-        )
-    ]
-)
+        children = [
+            html.Div(
+                className = "content",
+                children=[
+                    html.Header(
+                        style={'color':'#7FDBFF'},
+                    ),
+                    html.Div(className = "dropdown",
+                             children = [
+                                dcc.Dropdown(
+                                id="picked_day",
+                                options=[                  
+                                        {'label': 'Today', 'value': 29},
+                                        {'label': 'Yesterday', 'value': 30},
+                                ],
+                                value = 29,
+                    )
+                             ],
+                             style={"width": "25%"})
+                    ,
+                    html.Div(dcc.Graph(id='heatmap'),
+                            style={'padding-left':'0px', 'width':'100%'}),
+                    html.Div(dcc.Graph(id='routine',
+                                    #    hoverData={'points': [{'pointNumber': None}]}
+                                    ),
+                            style={'width':'100%'},
+                            ),
+                    modal,
+                    dbc.Row(
+                        dbc.Col(dbc.Button("Other Pages", id="open"), className="text-right", width=12),
+                        justify="end"
+                    ),
+                    navigationModal
+                ]
+            )
+        ]
+    ) 
+])
 
-@app.callback(Output("heatmap", "figure"), Input("picked_day", "value"))
+@callback(Output("heatmap", "figure"), Input("picked_day", "value"))
 def updateGraph(picked_day):
     new_esm_df = esm_df.loc[(esm_df['month']==4) & (esm_df['day']==picked_day)]
     z = [new_esm_df.Attention.to_numpy()]
@@ -120,7 +127,7 @@ def updateGraph(picked_day):
     
     return fig1
 
-@app.callback(Output("routine", "figure"),[ Input("picked_day", "value"), Input("routine", "hoverData")])
+@callback(Output("routine", "figure"),[ Input("picked_day", "value"), Input("routine", "hoverData")])
 def updateRoutine(picked_day, hoverData):
     if(picked_day==29):
         app_df = pd.read_csv(dir_path + '/User3041/AppUsageStatEntity-5565824000.csv')
@@ -160,12 +167,13 @@ def updateRoutine(picked_day, hoverData):
     
     return fig2
 
-@app.callback(
+@callback(
     Output("modal", "is_open"),
     # Output("hover_info","children"),
     [Input("routine", "clickData"), Input("close", "n_clicks")],
     [State("modal", "is_open")],
 )
+
 def toggle_modal(hover_data,close_button, is_open):
     # return is_open, hover_data
     if hover_data or close_button:
@@ -176,16 +184,17 @@ def toggle_modal(hover_data,close_button, is_open):
         return not is_open
     return is_open
 
-@app.callback(
+@callback(
     Output("nav_modal", "is_open"),
     [Input("open", "n_clicks"), Input("close", "n_clicks")],
     [State("modal", "is_open")],
 )
+
 def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
