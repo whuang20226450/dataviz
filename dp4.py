@@ -36,11 +36,11 @@ figX = px.bar(ac_df, x='day', y='time')
 # fig.update_layout(height=200)
 
 navigationModal = dbc.Modal([
-            dbc.ModalHeader("Choose an option"),
+            dbc.ModalHeader("Navigate to other pages"),
             dbc.ModalBody([
-                dcc.Link('Go to Page 1', href='/page1'),
+                dcc.Link('Go to Use page', href='/page1'),
                 html.Br(),
-                dcc.Link('Go to Page 2', href='/page2')
+                dcc.Link('Go to Analysis page', href='/page2')
             ]),
             dbc.ModalFooter(
                 dbc.Button("Close", id="close", className="ml-auto")
@@ -50,9 +50,9 @@ navigationModal = dbc.Modal([
 
 modal = dbc.Modal(
             [
-                dbc.ModalHeader("header"),
+                dbc.ModalHeader("App Usage history"),
                 dbc.ModalBody([
-                    html.H4(id='hover_info'),
+                    # html.H4(id='hover_info'),
                     dcc.Graph(
                         id='modal_graph',
                         figure=figX
@@ -95,8 +95,11 @@ app.layout = html.Div(
                 ),
                 html.Div(dcc.Graph(id='heatmap'),
                          style={'padding-left':'0px', 'width':'100%'}),
-                html.Div(dcc.Graph(id='routine'),
-                         style={'width':'100%'}),
+                html.Div(dcc.Graph(id='routine',
+                                #    hoverData={'points': [{'pointNumber': None}]}
+                                   ),
+                         style={'width':'100%'},
+                         ),
                 modal,
                 dbc.Row(
                     dbc.Col(dbc.Button("Other Pages", id="open"), className="text-right", width=12),
@@ -117,30 +120,30 @@ def updateGraph(picked_day):
     
     return fig1
 
-@app.callback(Output("routine", "figure"),[ Input("picked_day", "value")])
-def updateRoutine(picked_day):
+@app.callback(Output("routine", "figure"),[ Input("picked_day", "value"), Input("routine", "hoverData")])
+def updateRoutine(picked_day, hoverData):
     if(picked_day==29):
-        app_df = pd.read_csv(dir_path + '/P3041/AppUsageStatEntity-5565824000.csv')
-        ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5565824000.csv')
+        app_df = pd.read_csv(dir_path + '/User3041/AppUsageStatEntity-5565824000.csv')
+        # ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5565824000.csv')
     else:
-        app_df = pd.read_csv(dir_path + '/P3041/AppUsageStatEntity-5571008000.csv')
-        ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5571008000.csv')
+        app_df = pd.read_csv(dir_path + '/User3041/AppUsageStatEntity-5571008000.csv')
+        # ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5571008000.csv')
     
-    app_df = app_df.drop_duplicates(subset='timestamp', keep='first')
+    # app_df = app_df.drop_duplicates(subset='timestamp', keep='first')
     app_df.timestamp = pd.to_datetime(app_df.timestamp)
 
-    ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5571008000.csv')
-    ph_df.timestamp = pd.to_datetime(ph_df.timestamp)
-    ph_df = ph_df.loc[(ph_df.confidence>=0.98) & (ph_df.type != 'STILL') & (ph_df.type != 'UNKNOWN') & (ph_df.type != 'TILTING')]
-    ph_df.rename(columns={'type': 'name'}, inplace=True)
-    merged_df = pd.merge(app_df, ph_df, how="outer", on=['timestamp', 'name'])
-    ac = ["activity"] * len(merged_df)
+    # ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5571008000.csv')
+    # ph_df.timestamp = pd.to_datetime(ph_df.timestamp)
+    # ph_df = ph_df.loc[(ph_df.confidence>=0.98) & (ph_df.type != 'STILL') & (ph_df.type != 'UNKNOWN') & (ph_df.type != 'TILTING')]
+    # ph_df.rename(columns={'type': 'name'}, inplace=True)
+    # merged_df = pd.merge(app_df, ph_df, how="outer", on=['timestamp', 'name'])
+    ac = ["activity"] * len(app_df)
 
-    fig2 = px.bar(merged_df,x='timestamp', y=ac, color='name', orientation='h')
+    fig2 = px.bar(app_df,x='timestamp', y=ac, color='name', orientation='h')
     fig2.update_layout(height=200, margin=dict(l=20, r=20, t=20, b=20), plot_bgcolor='white', paper_bgcolor='white')
     fig2.update_yaxes(showticklabels=False, showgrid=False)
     fig2.update_xaxes(title='time')
-    fig2.update_traces(hovertemplate="<b>X: %{x}</b><br><b>Y: %{y}</b>", 
+    fig2.update_traces(hovertemplate="<b>%{x}</b>", 
                   hoverinfo='text', 
                 #   line=dict(color='#1f77b4', width=3, opacity=0.7),
                   hoverlabel=dict(bgcolor='#1f77b4'))
@@ -159,7 +162,7 @@ def updateRoutine(picked_day):
 
 @app.callback(
     Output("modal", "is_open"),
-    Output("hover_info","children"),
+    # Output("hover_info","children"),
     [Input("routine", "clickData"), Input("close", "n_clicks")],
     [State("modal", "is_open")],
 )
@@ -169,8 +172,9 @@ def toggle_modal(hover_data,close_button, is_open):
         # x = hover_data['points'][0]['x']
         # y = hover_data['points'][0]['y']
         # text = "x = "+str(x)+" & y = "+str(y)
-        return not is_open, str(hover_data['points'][0]['value'])
-    return is_open,None
+        # , str(hover_data['points'][0]['value'])
+        return not is_open
+    return is_open
 
 @app.callback(
     Output("nav_modal", "is_open"),
