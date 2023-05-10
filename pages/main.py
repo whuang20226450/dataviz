@@ -6,7 +6,6 @@ from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
 import os
-import dash_bootstrap_components as dbc
 import plotly.figure_factory as ff
 from dash import callback
 
@@ -39,7 +38,7 @@ figX = px.bar(ac_df, x='day', y='time')
 navigationModal = dbc.Modal([
             dbc.ModalHeader("Navigate to other pages"),
             dbc.ModalBody([
-                dcc.Link('Go to Use page', href='/page1'),
+                dcc.Link('Go to Use page', href='/use'),
                 html.Br(),
                 dcc.Link('Go to Analysis page', href='/analysis')
             ]),

@@ -12,6 +12,7 @@ def Navbar():
                 dbc.NavItem(dbc.NavLink("Analysis", href="/analysis")),
                 dbc.NavItem(dbc.NavLink("Planning", href="/plan")),
                 dbc.NavItem(dbc.NavLink("Use", href="/use")),
+                dbc.NavItem(dbc.NavLink("Schedule suggestions", href="/suggest")),
             ] ,
             brand = "Tempus",
             brand_style = {"color": "black",

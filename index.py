@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output
 from app import app
 
 # Connect to your app pages
-from pages import main, analysis, plan, use
+from pages import main, analysis, plan, use, suggest
 
 # Connect the navbar to the index
 from components import navbar
@@ -27,14 +27,16 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/main':
-        return main.layout
     if pathname == '/analysis':
         return analysis.layout
     if pathname == '/plan':
         return plan.layout
     if pathname == '/use':
         return use.layout
+    if pathname == '/suggest':
+        return suggest.layout
+    if pathname == '/main':
+        return main.layout
     else: # if redirected to unknown link
         return main.layout
 
