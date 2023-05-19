@@ -35,7 +35,7 @@ figX = px.bar(ac_df, x='day', y='time')
 # fig = ff.create_annotated_heatmap(z, colorscale='Viridis')
 # fig.update_layout(height=200)
 
-navigationModal = dbc.Modal([
+navigationModal =    dbc.Modal([
             dbc.ModalHeader("Navigate to other pages"),
             dbc.ModalBody([
                 dcc.Link('Go to Use page', href='/use'),
