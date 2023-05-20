@@ -15,15 +15,15 @@ def Navbar():
                 dbc.NavItem(dbc.NavLink("Schedule suggestions", href="/suggest")),
             ] ,
             brand = "Tempus",
-            brand_style = {"color": "black",
+            brand_style = {"color": "white",
                            "font-family": "Arial",
                            "font-style": "italic",
                            "font-weight": "bold",
                            "font-size": "25px"
                            },
             brand_href = "/main",
-            color = "light",
-            dark = False,
+            color = "dark",
+            dark = True,
             links_left= True
         ), 
     ])

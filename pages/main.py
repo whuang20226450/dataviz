@@ -7,7 +7,11 @@ import plotly.express as px
 import pandas as pd
 import os
 import plotly.figure_factory as ff
+import plotly.graph_objects as go
 from dash import callback
+import numpy as np
+
+from datetime import date
 
 
 
@@ -35,18 +39,18 @@ figX = px.bar(ac_df, x='day', y='time')
 # fig = ff.create_annotated_heatmap(z, colorscale='Viridis')
 # fig.update_layout(height=200)
 
-navigationModal =    dbc.Modal([
-            dbc.ModalHeader("Navigate to other pages"),
-            dbc.ModalBody([
-                dcc.Link('Go to Use page', href='/use'),
-                html.Br(),
-                dcc.Link('Go to Analysis page', href='/analysis')
-            ]),
-            dbc.ModalFooter(
-                dbc.Button("Close", id="close", className="ml-auto")
-            ),
-        ], id="nav_modal", centered=True)
-    # ], style={'position': 'fixed', 'bottom': 10, 'right': 10})
+# navigationModal =    dbc.Modal([
+#             dbc.ModalHeader("Navigate to other pages"),
+#             dbc.ModalBody([
+#                 dcc.Link('Go to Use page', href='/use'),
+#                 html.Br(),
+#                 dcc.Link('Go to Analysis page', href='/analysis')
+#             ]),
+#             dbc.ModalFooter(
+#                 dbc.Button("Close", id="close", className="ml-auto")
+#             ),
+#         ], id="nav_modal", centered=True)
+#     # ], style={'position': 'fixed', 'bottom': 10, 'right': 10})
 
 modal = dbc.Modal(
             [
@@ -87,38 +91,38 @@ layout = dbc.Container([
                     ),
                     html.Div(className = "dropdown",
                              children = [
-                                dcc.Dropdown(
-                                id="picked_day",
-                                options=[                  
-                                        {'label': 'Today', 'value': 29},
-                                        {'label': 'Yesterday', 'value': 30},
-                                ],
-                                value = 29,
-                    )
+                                dcc.DatePickerSingle(
+                                            id='picked-date',
+                                            min_date_allowed=date(2010, 1, 5),
+                                            max_date_allowed=date(2023, 9, 19),
+                                            initial_visible_month=date(2019, 5, 8),
+                                            date=date(2019, 5, 8),
+                                        )
                              ],
                              style={"width": "25%"})
                     ,
-                    html.Div(dcc.Graph(id='heatmap'),
-                            style={'padding-left':'0px', 'width':'100%'}),
+                    # html.Div(dcc.Graph(id='heatmap'),
+                    #         style={'padding-left':'0px', 'width':'100%'}),
                     html.Div(dcc.Graph(id='routine',
                                     #    hoverData={'points': [{'pointNumber': None}]}
                                     ),
                             style={'width':'100%'},
                             ),
                     modal,
-                    dbc.Row(
-                        dbc.Col(dbc.Button("Other Pages", id="open"), className="text-right", width=12),
-                        justify="end"
-                    ),
-                    navigationModal
+                    # dbc.Row(
+                    #     dbc.Col(dbc.Button("Other Pages", id="open"), className="text-right", width=12),
+                    #     justify="end"
+                    # ),
+                    # navigationModal
                 ]
             )
         ]
     ) 
 ])
 
-@callback(Output("heatmap", "figure"), Input("picked_day", "value"))
-def updateGraph(picked_day):
+@callback(Output("heatmap", "figure"), Input("picked-date", "date"))
+def updateGraph(date):
+    picked_day = 29
     new_esm_df = esm_df.loc[(esm_df['month']==4) & (esm_df['day']==picked_day)]
     z = [new_esm_df.Attention.to_numpy()]
     fig1 = ff.create_annotated_heatmap(z, colorscale='Viridis')
@@ -126,8 +130,9 @@ def updateGraph(picked_day):
     
     return fig1
 
-@callback(Output("routine", "figure"),[ Input("picked_day", "value"), Input("routine", "hoverData")])
-def updateRoutine(picked_day, hoverData):
+@callback(Output("routine", "figure"),[ Input("picked-date", "date"), Input("routine", "hoverData")])
+def updateRoutine(picked_date, hoverData):
+    picked_day = 29
     if(picked_day==29):
         app_df = pd.read_csv(dir_path + '/User3041/AppUsageStatEntity-5565824000.csv')
         # ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5565824000.csv')
@@ -145,7 +150,49 @@ def updateRoutine(picked_day, hoverData):
     # merged_df = pd.merge(app_df, ph_df, how="outer", on=['timestamp', 'name'])
     ac = ["activity"] * len(app_df)
 
-    fig2 = px.bar(app_df,x='timestamp', y=ac, color='name', orientation='h')
+    ddate = date.fromisoformat(picked_date)
+
+    df = pd.read_csv(dir_path + '/data/' + 'processed_data_v2.csv')
+    df["start_time"] = pd.to_datetime(df["start_time"])
+    df["date"] = df["start_time"].dt.date
+
+    # print(df["date"])
+
+
+    df_sel = df[df.user_id == "P0705"]
+    df_sel = df_sel[df_sel["date"] == ddate]
+
+    # new_esm_df = esm_df.loc[(esm_df['month']==4) & (esm_df['day']==picked_day)]
+    # z = [new_esm_df.Attention.to_numpy()]
+
+
+    fig = px.timeline(df_sel, 
+                      x_start="start_time", 
+                      x_end="end_time", 
+                      y = np.ones(len(df_sel)), 
+                      color="activity_type",
+                      hover_name = "name",
+                    #   title = f"Currently planned vs suggested schedule on {picked_day}",
+                    #   color_discrete_sequence = ["gray", "orangered"]
+                      )
+    
+    # x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+    # fig.add_trace(go.Scatter(
+    #     x=x,
+    #     y=[5, 15, None, 10, 5, 0, 10, None, 15, 5, 5, 10, 20, 15, 5],
+    #     name='Attention'
+    #     ),
+    # secondary_y=True)
+
+    fig.update_yaxes(autorange="reversed")
+    fig.update_layout(plot_bgcolor = "white", 
+                      paper_bgcolor = "white")
+    fig.update_layout(showlegend=True)
+
+    return fig
+
+    fig2 = px.bar(app_df, x='timestamp', y=ac, color='name', orientation='h')
     fig2.update_layout(height=200, margin=dict(l=20, r=20, t=20, b=20), plot_bgcolor='white', paper_bgcolor='white')
     fig2.update_yaxes(showticklabels=False, showgrid=False)
     fig2.update_xaxes(title='time')
