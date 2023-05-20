@@ -14,6 +14,8 @@ from components import navbar
 # Define the navbar
 nav = navbar.Navbar()
 
+server = app.server
+
 # Define the index page layout
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
