@@ -1,6 +1,15 @@
 # Import necessary libraries
 from dash import html
 import dash_bootstrap_components as dbc
+from dash import dcc
+import os
+import pandas as pd
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+df = pd.read_csv(dir_path + '/data/' + 'processed_data_v2.csv')
+
+users = list(df["user_id"].unique())
+# print(users)
 
 # Define the navbar structure
 def Navbar():
@@ -13,6 +22,15 @@ def Navbar():
                 dbc.NavItem(dbc.NavLink("Planning", href="/plan")),
                 dbc.NavItem(dbc.NavLink("Use", href="/use")),
                 dbc.NavItem(dbc.NavLink("Schedule suggestions", href="/suggest")),
+                html.Span(dcc.Dropdown(
+                            options=users,
+                            value="P0705",
+                            id = "user-dropdown",
+                            style={
+                                    'width': '150%'
+                                }
+                            ), 
+                        className="mr-auto"),
             ] ,
             brand = "Tempus",
             brand_style = {"color": "white",

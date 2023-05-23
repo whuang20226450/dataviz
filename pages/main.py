@@ -10,18 +10,15 @@ import plotly.figure_factory as ff
 import plotly.graph_objects as go
 from dash import callback
 import numpy as np
+from plotly.subplots import make_subplots
 
 from datetime import date
 
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-esm_df = pd.read_csv(dir_path + "/esm_data.csv")
-uid = 3024
-esm_df = esm_df.loc[esm_df['UID'] == uid]
-esm_df['responseTime_KDT'] = pd.to_datetime(esm_df['responseTime_KDT'])
-esm_df['month'] = esm_df['responseTime_KDT'].dt.month
-esm_df['day'] = esm_df['responseTime_KDT'].dt.day
+esm_df = pd.read_csv(dir_path + "/data" + "/esm_data.csv")
+esm_df['date'] = pd.to_datetime(esm_df['responseTime_KDT']).dt.date
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 ac_df = pd.read_csv(dir_path + "/activity.csv")
@@ -101,13 +98,13 @@ layout = dbc.Container([
                              ],
                              style={"width": "25%"})
                     ,
-                    # html.Div(dcc.Graph(id='heatmap'),
-                    #         style={'padding-left':'0px', 'width':'100%'}),
                     html.Div(dcc.Graph(id='routine',
                                     #    hoverData={'points': [{'pointNumber': None}]}
                                     ),
                             style={'width':'100%'},
                             ),
+                    html.Div(dcc.Graph(id='atten'),
+                            style={'padding-left':'0px', 'width':'100%'}),
                     modal,
                     # dbc.Row(
                     #     dbc.Col(dbc.Button("Other Pages", id="open"), className="text-right", width=12),
@@ -120,77 +117,109 @@ layout = dbc.Container([
     ) 
 ])
 
-@callback(Output("heatmap", "figure"), Input("picked-date", "date"))
-def updateGraph(date):
-    picked_day = 29
-    new_esm_df = esm_df.loc[(esm_df['month']==4) & (esm_df['day']==picked_day)]
-    z = [new_esm_df.Attention.to_numpy()]
-    fig1 = ff.create_annotated_heatmap(z, colorscale='Viridis')
-    fig1.update_layout(height=200, width=1050)
-    
-    return fig1
+@callback(Output("atten", "figure"), [Input("picked-date", "date"), Input("user-dropdown", "value")])
+def updateGraph(picked_date, value):
+    ddate = date.fromisoformat(picked_date)
 
-@callback(Output("routine", "figure"),[ Input("picked-date", "date"), Input("routine", "hoverData")])
-def updateRoutine(picked_date, hoverData):
-    picked_day = 29
-    if(picked_day==29):
-        app_df = pd.read_csv(dir_path + '/User3041/AppUsageStatEntity-5565824000.csv')
+    esm_sel = esm_df[esm_df['UID'] == int(value[1:])]
+    esm_sel = esm_sel[esm_sel["date"] == ddate]
+    fig = go.Figure()
+    fig.add_traces(go.Scatter(
+        x = pd.to_datetime(esm_sel['responseTime_KDT']),
+        y = esm_sel["Attention"],
+        name='Attention'
+        ))
+    fig.add_traces(go.Scatter(
+        x = pd.to_datetime(esm_sel['responseTime_KDT']),
+        y = esm_sel["Stress"],
+        name='Stress'
+        ))
+
+    fig.update_layout(showlegend=True)
+    fig.update_layout(plot_bgcolor = "white", 
+                      paper_bgcolor = "white")
+    fig.update_layout(height = 300)
+
+    return fig
+    
+
+@callback(Output("routine", "figure"),
+          [Input("picked-date", "date"), Input("routine", "hoverData"), Input("user-dropdown", "value")])
+def updateRoutine(picked_date, hoverData, value):
+    # picked_day = 29
+    # if(picked_day==29):
+        # app_df = pd.read_csv(dir_path + '/User3041/AppUsageStatEntity-5565824000.csv')
         # ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5565824000.csv')
-    else:
-        app_df = pd.read_csv(dir_path + '/User3041/AppUsageStatEntity-5571008000.csv')
+    # else:
+        # app_df = pd.read_csv(dir_path + '/User3041/AppUsageStatEntity-5571008000.csv')
         # ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5571008000.csv')
     
     # app_df = app_df.drop_duplicates(subset='timestamp', keep='first')
-    app_df.timestamp = pd.to_datetime(app_df.timestamp)
+    # app_df.timestamp = pd.to_datetime(app_df.timestamp)
 
     # ph_df = pd.read_csv(dir_path + '/P3041/PhysicalActivityEventEntity-5571008000.csv')
     # ph_df.timestamp = pd.to_datetime(ph_df.timestamp)
     # ph_df = ph_df.loc[(ph_df.confidence>=0.98) & (ph_df.type != 'STILL') & (ph_df.type != 'UNKNOWN') & (ph_df.type != 'TILTING')]
     # ph_df.rename(columns={'type': 'name'}, inplace=True)
     # merged_df = pd.merge(app_df, ph_df, how="outer", on=['timestamp', 'name'])
-    ac = ["activity"] * len(app_df)
+    # ac = ["activity"] * len(app_df)
 
     ddate = date.fromisoformat(picked_date)
-
     df = pd.read_csv(dir_path + '/data/' + 'processed_data_v2.csv')
     df["start_time"] = pd.to_datetime(df["start_time"])
     df["date"] = df["start_time"].dt.date
 
     # print(df["date"])
+    # print(value)
 
-
-    df_sel = df[df.user_id == "P0705"]
+    df_sel = df[df.user_id == value]
     df_sel = df_sel[df_sel["date"] == ddate]
+    
+    esm_sel = esm_df[esm_df['UID'] == int(value[1:])]
+    esm_sel = esm_sel[esm_sel["date"] == ddate]
 
-    # new_esm_df = esm_df.loc[(esm_df['month']==4) & (esm_df['day']==picked_day)]
-    # z = [new_esm_df.Attention.to_numpy()]
-
-
-    fig = px.timeline(df_sel, 
-                      x_start="start_time", 
-                      x_end="end_time", 
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # print(df_sel)
+    fig1 = px.timeline(df_sel, 
+                      x_start = df_sel["start_time"], 
+                      x_end = df_sel["end_time"], 
                       y = np.ones(len(df_sel)), 
-                      color="activity_type",
+                      color = "activity_type",
                       hover_name = "name",
-                    #   title = f"Currently planned vs suggested schedule on {picked_day}",
-                    #   color_discrete_sequence = ["gray", "orangered"]
                       )
     
-    # x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    for bar in fig1.data:
+        fig.add_trace(bar, secondary_y = False)
 
-    # fig.add_trace(go.Scatter(
-    #     x=x,
-    #     y=[5, 15, None, 10, 5, 0, 10, None, 15, 5, 5, 10, 20, 15, 5],
-    #     name='Attention'
-    #     ),
-    # secondary_y=True)
+        # PLotly treats different bars in this timeline as different parts of the data
+        # so calling fig1.data[0] out won't work here
+        # but calling it several times makes plotly stack them on top of each other.
+        # FML
+
+    fig.add_trace(go.Scatter(
+        x = pd.to_datetime(esm_sel['responseTime_KDT']),
+        y = esm_sel["Attention"],
+        name='Attention'
+        ), secondary_y = True)
+    # fig.add_traces(fig1.data)
+
+    
+    fig.layout.xaxis = fig1.layout.xaxis
 
     fig.update_yaxes(autorange="reversed")
     fig.update_layout(plot_bgcolor = "white", 
                       paper_bgcolor = "white")
     fig.update_layout(showlegend=True)
+    fig.update_layout(height = 450)
 
-    return fig
+    fig1.update_yaxes(autorange="reversed")
+    fig1.update_layout(height = 450)
+    fig1.update_layout(plot_bgcolor = "white", 
+                      paper_bgcolor = "white")
+    fig1.update_layout(showlegend=True)
+    fig1.update_layout(dict(yaxis = dict(visible = False)))
+
+    return fig1
 
     fig2 = px.bar(app_df, x='timestamp', y=ac, color='name', orientation='h')
     fig2.update_layout(height=200, margin=dict(l=20, r=20, t=20, b=20), plot_bgcolor='white', paper_bgcolor='white')
@@ -222,6 +251,8 @@ def updateRoutine(picked_date, hoverData):
 
 def toggle_modal(hover_data,close_button, is_open):
     # return is_open, hover_data
+    print(hover_data)
+    print(is_open)
     if hover_data or close_button:
         # x = hover_data['points'][0]['x']
         # y = hover_data['points'][0]['y']
