@@ -96,10 +96,10 @@ layout = dbc.Container([
                                         html.Br(),
                                         dcc.DatePickerSingle(
                                             id='startDate-select',
-                                            min_date_allowed=date(2023, 1, 5),
+                                            min_date_allowed=date(2018, 1, 5),
                                             max_date_allowed=date(2023, 9, 19),
-                                            initial_visible_month=date(2023, 5, 4),
-                                            date=date(2023, 5, 4),
+                                            initial_visible_month=date(2019, 4, 1),
+                                            date=date(2019, 4, 28),
                                         ),
                                     ],
                                 ),
@@ -175,9 +175,10 @@ def toggle_collapse(n):
     Input("graph-select", "value"),
     Input("comparison-select", "value"),
     Input("startDate-select", "date"),
+    Input("user-dropdown", "value")
 )
-def fig_callback(graph_type, comparison_type, start_date):
-    fig = plot_fig.plot_main(graph_type, comparison_type, date.fromisoformat(start_date))
+def fig_callback(graph_type, comparison_type, start_date, value):
+    fig = plot_fig.plot_main(graph_type, comparison_type, date.fromisoformat(start_date), value)
     return fig
 
 
