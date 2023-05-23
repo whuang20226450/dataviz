@@ -2,7 +2,7 @@
 
 This depository contains the project for CS481 Dava Visualization course offered at KAIST in Spring 2023.
 
-## Members - Team 3
+## Members - [Group 2] Team 4 - Tempus
 - ChinWei Huang
 - Washik Uddin Ahmed Mollah
 - Nikolai Kurlovich
