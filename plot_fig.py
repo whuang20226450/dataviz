@@ -53,7 +53,7 @@ def plot_main(graph_type, comparison_type, start_date, user):
         fig1 = weekly_productivity_plot(comparison_type, start_date, user)
         fig2 = None
     elif graph_type == "Monthly Productivity":
-        fig1, fig2 = monthly_productivity_plot(df_fake, comparison_type, start_date)
+        fig1, fig2 = monthly_productivity_plot(comparison_type, start_date, user)
     elif graph_type == "Activity Analysis":
         fig1, fig2 = activity_analysis_plot(comparison_type, start_date, user)
     elif graph_type == "Weekly Key Metrics (S+A) Levels":
@@ -111,7 +111,8 @@ def weekly_productivity_plot(comparison_type, start_date, value):
     
     fig.add_traces(go.Bar(name='Self', x=list(productivities.keys()), y=list(productivities.values()), marker_color='#66C5CC'))
     if comparison_type != 'Self':
-        fig.add_traces(go.Bar(name=comparison_type, x=df.week_day, y=df.loc[:6].productivity_other, marker_color='#F6CF71'))
+        # fig.add_traces(go.Bar(name=comparison_type, x=df.week_day, y=df.loc[:6].productivity_other, marker_color='#F6CF71'))
+        fig.add_traces(go.Bar(name=comparison_type, x=list(productivities.keys()), y=list(productivities.values())+ np.random.normal(0.5 if comparison_type == "Best users" else -0.5, 0.5, len(productivities.values())), marker_color='#F6CF71'))
 
     fig.update_layout(
         title=f'<B>Weekly Productivity</B> compared with {comparison_type} starting from {start_date}',
@@ -139,12 +140,29 @@ def weekly_productivity_plot(comparison_type, start_date, value):
     return fig
 
 
-def monthly_productivity_plot(df, comparison_type, start_date):
-    fig1 = calendar_heatmap(df.productivity.values.tolist(), start_date, 
+def monthly_productivity_plot(comparison_type, start_date, value):
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    df = pd.read_csv(dir_path + '/pages/data/' + 'processed_data_v2.csv')
+    df["start_time"] = pd.to_datetime(df["start_time"])
+    df["end_time"] = pd.to_datetime(df["end_time"])
+    df["date"] = df["start_time"].dt.date
+    df = df[df.user_id == value]
+    df = df[df["date"] >= start_date]
+    # df = df[:7]
+
+    productivities = {}
+    # print(sorted(list(set(df.date))))
+
+    for date in sorted(list(set(df.date))):
+        productivities[date] = get_prod(df[df["date"] == date])
+
+    fig1 = calendar_heatmap(list(productivities.values()), min(productivities.keys()), 
         f'<B>Monthly Productivity</B> from {str(start_date)}')
 
-    fig2 = calendar_heatmap(df.productivity_diff.values.tolist(), start_date, 
-        f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
+    # fig2 = calendar_heatmap(df.productivity_diff.values.tolist(), start_date, 
+    #     f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
+    fig2 = calendar_heatmap(list(productivities.values() + np.random.normal(0.5 if comparison_type == "Best users" else -0.5, 1, len(productivities.values()))), min(productivities.keys()), 
+        f'<B>Monthly Productivity</B> from {str(start_date)}')
 
     return fig1, fig2
 
