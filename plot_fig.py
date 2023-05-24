@@ -126,7 +126,7 @@ def weekly_productivity_plot(comparison_type, start_date, value):
         linewidth=1,        # axis thickness
     )
     fig.update_yaxes(
-        title_text="stress level",
+        title_text="Productivity",
         ticks='outside',
         showline=True,
         linecolor='black',
@@ -311,7 +311,7 @@ def activity_analysis_plot(comparison_type, start_date, value):
         linewidth=1,        # axis thickness
     )
     fig2.update_yaxes(
-        title_text="stress level",
+        title_text="Productivity",
         ticks='outside',
         showline=True,
         linecolor='black',
