@@ -162,7 +162,7 @@ def monthly_productivity_plot(comparison_type, start_date, value):
     # fig2 = calendar_heatmap(df.productivity_diff.values.tolist(), start_date, 
     #     f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
     fig2 = calendar_heatmap(list(productivities.values()), min(productivities.keys()), 
-        f'<B>Monthly Productivity</B> from {str(start_date)}')
+        f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
 
     return fig1, fig2
 
