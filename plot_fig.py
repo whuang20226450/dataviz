@@ -126,7 +126,7 @@ def weekly_productivity_plot(comparison_type, start_date, value):
         linewidth=1,        # axis thickness
     )
     fig.update_yaxes(
-        title_text="stress level",
+        title_text="Productivity",
         ticks='outside',
         showline=True,
         linecolor='black',
@@ -255,7 +255,8 @@ def activity_analysis_plot(comparison_type, start_date, value):
                         'labels': [new_df['Activity Type']], 
                         'values': [new_df['Percentage']],
                         'pull': [[0.2 if i == idx else 0. for i in range(len(new_df['Activity Type']))]], 
-                        'title': f'{new_df["Activity Type"]} highlighted',
+                        'title': f'{activity} highlighted',
+                        # 'title': f'{new_df["Activity Type"]} highlighted',
                     },
                     {'margin': dict(t=m1, b=m1, l=m1, r=m1)}
                 ],
@@ -311,7 +312,7 @@ def activity_analysis_plot(comparison_type, start_date, value):
         linewidth=1,        # axis thickness
     )
     fig2.update_yaxes(
-        title_text="stress level",
+        title_text="hours",
         ticks='outside',
         showline=True,
         linecolor='black',
