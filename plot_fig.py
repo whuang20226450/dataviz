@@ -112,7 +112,7 @@ def weekly_productivity_plot(comparison_type, start_date, value):
     fig.add_traces(go.Bar(name='Self', x=list(productivities.keys()), y=list(productivities.values()), marker_color='#66C5CC'))
     if comparison_type != 'Self':
         # fig.add_traces(go.Bar(name=comparison_type, x=df.week_day, y=df.loc[:6].productivity_other, marker_color='#F6CF71'))
-        fig.add_traces(go.Bar(name=comparison_type, x=list(productivities.keys()), y=list(productivities.values())+ np.random.normal(0.5 if comparison_type == "Best users" else -0.5, 0.5, len(productivities.values())), marker_color='#F6CF71'))
+        fig.add_traces(go.Bar(name=comparison_type, x=list(productivities.keys()), y=np.abs(list(productivities.values())+ np.random.normal(0.5 if comparison_type == "Best users" else -0.5, 0.5, len(productivities.values()))), marker_color='#F6CF71'))
 
     fig.update_layout(
         title=f'<B>Weekly Productivity</B> compared with {comparison_type} starting from {start_date}',
@@ -161,7 +161,7 @@ def monthly_productivity_plot(comparison_type, start_date, value):
 
     # fig2 = calendar_heatmap(df.productivity_diff.values.tolist(), start_date, 
     #     f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
-    fig2 = calendar_heatmap(list(productivities.values() + np.random.normal(0.5 if comparison_type == "Best users" else -0.5, 1, len(productivities.values()))), min(productivities.keys()), 
+    fig2 = calendar_heatmap(list(productivities.values() + np.abs(np.random.normal(0.5 if comparison_type == "Best users" else -0.5, 1, len(productivities.values())))), min(productivities.keys()), 
         f'<B>Monthly Productivity</B> from {str(start_date)}')
 
     return fig1, fig2
