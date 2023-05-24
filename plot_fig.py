@@ -112,7 +112,7 @@ def weekly_productivity_plot(comparison_type, start_date, value):
     fig.add_traces(go.Bar(name='Self', x=list(productivities.keys()), y=list(productivities.values()), marker_color='#66C5CC'))
     if comparison_type != 'Self':
         # fig.add_traces(go.Bar(name=comparison_type, x=df.week_day, y=df.loc[:6].productivity_other, marker_color='#F6CF71'))
-        fig.add_traces(go.Bar(name=comparison_type, x=list(productivities.keys()), y=np.abs(list(productivities.values())+ np.random.normal(0.5 if comparison_type == "Best users" else -0.5, 0.5, len(productivities.values()))), marker_color='#F6CF71'))
+        fig.add_traces(go.Bar(name=comparison_type, x=list(productivities.keys()), y=list(productivities.values()), marker_color='#F6CF71'))
 
     fig.update_layout(
         title=f'<B>Weekly Productivity</B> compared with {comparison_type} starting from {start_date}',
@@ -126,7 +126,7 @@ def weekly_productivity_plot(comparison_type, start_date, value):
         linewidth=1,        # axis thickness
     )
     fig.update_yaxes(
-        title_text="Productivity",
+        title_text="stress level",
         ticks='outside',
         showline=True,
         linecolor='black',
@@ -161,7 +161,7 @@ def monthly_productivity_plot(comparison_type, start_date, value):
 
     # fig2 = calendar_heatmap(df.productivity_diff.values.tolist(), start_date, 
     #     f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
-    fig2 = calendar_heatmap(list(productivities.values() + np.abs(np.random.normal(0.5 if comparison_type == "Best users" else -0.5, 1, len(productivities.values())))), min(productivities.keys()), 
+    fig2 = calendar_heatmap(list(productivities.values()), min(productivities.keys()), 
         f'<B>Monthly Productivity</B> from {str(start_date)}')
 
     return fig1, fig2
@@ -255,8 +255,7 @@ def activity_analysis_plot(comparison_type, start_date, value):
                         'labels': [new_df['Activity Type']], 
                         'values': [new_df['Percentage']],
                         'pull': [[0.2 if i == idx else 0. for i in range(len(new_df['Activity Type']))]], 
-                        'title': f'{activity} highlighted',
-                        # 'title': f'{new_df["Activity Type"]} highlighted',
+                        'title': f'{new_df["Activity Type"]} highlighted',
                     },
                     {'margin': dict(t=m1, b=m1, l=m1, r=m1)}
                 ],
@@ -312,7 +311,7 @@ def activity_analysis_plot(comparison_type, start_date, value):
         linewidth=1,        # axis thickness
     )
     fig2.update_yaxes(
-        title_text="hours",
+        title_text="stress level",
         ticks='outside',
         showline=True,
         linecolor='black',
