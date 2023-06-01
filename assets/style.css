@@ -20,15 +20,15 @@
 
 /* for range slider in main page */
 .rc-slider-track {
-    background-color: red;
+    background-color: rgb(232, 151, 151);
   }
 .rc-slider-dot-active {  
     border-color: red;
     border: solid 2px red;
 }
 .rc-slider-handle {
-    background-color: red;
-    border-color: red;
+    background-color: rgb(255, 0, 0);
+    border-color: rgb(255, 0, 0);
 }
 .rc-slider-handle:hover {
     border-color: red;
