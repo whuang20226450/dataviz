@@ -17,16 +17,50 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 color_map = ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"]
 
 # todo
-# 1. allow range slider to adjust atten as well
 # 2. make datepicker more noticeble
 # 3. make select-user-dropdown more good-looking
 # 4. make popup if user chooses date that doesn't have data
-# 5. change how the slider work for the bug 
+# 6. color pattern
 
 
 layout = dbc.Container([
         html.Div(
         [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Card(
+                            [
+                                dbc.CardBody("App Detail", style={'font-weight': 'bold'}),
+                                dcc.Graph(id='fig1'),
+                            ],
+                            className="mb-3",
+                        ),
+
+                        width=6
+                    ),
+                    dbc.Col(
+                        dbc.Card(
+                            [
+                                dbc.CardBody("Activity Analysis", style={'font-weight': 'bold'}),
+                                dcc.Graph(id='fig2'),
+                            ],
+                            className="mb-3",
+                        ),
+                        width=6,
+                        
+                    ),
+                ],
+                justify="center",
+            ),
+            dbc.Row(
+                dbc.Col(
+                    html.Div(
+                            dcc.Graph(id='routine'),
+                    ),
+                    width=12,
+                ),
+            ),
             dbc.Row(
                 [
                     dbc.Col(
@@ -52,56 +86,26 @@ layout = dbc.Container([
                 # justify="center",
                 # style={"background-color": "black"}
             ),
-            dbc.Row(
-                dbc.Col(
-                    html.Div(
-                            dcc.Graph(id='atten'),
-                    ),
-                    width=12,
-                ),
-            ),
-            dbc.Row(
-                dbc.Col(
-                    html.Div(
-                            dcc.Graph(id='routine'),
-                    ),
-                    width=12,
-                ),
-            ),
             dbc.Row(html.Div(html.Br())),  # empty row for spacing
             dbc.Row(
-                [
-                    dbc.Col(
-                        dbc.Card(
-                            [
-                                dbc.CardBody("App Detail"),
-                                dcc.Graph(id='fig1'),
-                            ],
-                            className="mb-3",
-                        ),
-
-                        width=6
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardBody("Attention v.s. Stress", style={'font-weight': 'bold'}),
+                            dcc.Graph(id='atten'),
+                        ],
+                        className="mb-3",
                     ),
-                    dbc.Col(
-                        dbc.Card(
-                            [
-                                dbc.CardBody("Activity Analysis"),
-                                dcc.Graph(id='fig2'),
-                            ],
-                            className="mb-3",
-                        ),
-                        width=6,
-                        
-                    ),
-                ],
-                justify="center",
+                    width=12,
+                ),
             ),
+
         ]
     ) 
 ])
 
 @callback(Output("atten", "figure"), [Input("picked-date", "date"), Input("user-dropdown", "value")])
-def updateGraph(picked_date, value):
+def updateAtten(picked_date, value):
 
     picked_date = date.fromisoformat(picked_date)
 
@@ -134,14 +138,9 @@ def updateGraph(picked_date, value):
             dtick = 1
         ),
     )
-    # fig.update_yaxes(
-    #     ticks='outside',
-    #     showline=True,
-    #     linecolor='black',
-    #     linewidth=1,
-    # )
 
     return fig
+
 
 @callback(Output("routine", "figure"),[Input("picked-date", "date"), Input('range-slider', 'value'), Input("user-dropdown", "value")])
 def updateRoutine(picked_date=29, picked_hours=[0,24], uid='P0705'):
@@ -149,22 +148,23 @@ def updateRoutine(picked_date=29, picked_hours=[0,24], uid='P0705'):
     start_hour, end_hour = picked_hours
     picked_hours = [start_hour + delta for delta in range(end_hour - start_hour)]
 
-    df = pd.read_csv(dir_path + '/data/' + 'processed_data_v2.csv')
-    data_start_time = df[df.user_id == uid].iloc[0]['start_time'][:10]
+    df = pd.read_csv(dir_path + '/data/' + 'processed_data_v3.csv')
+    data_start_time = df[df.user_id == uid].iloc[0]['start_time'][:10]  # [:10] is to extract the 10 chars '2019-05-10'
     data_end_time = df[df.user_id == uid].iloc[-1]['end_time'][:10]
     if date.fromisoformat(picked_date) < date.fromisoformat(data_start_time) or date.fromisoformat(picked_date) > date.fromisoformat(data_end_time):
         picked_date = data_start_time
 
-    df["start_time"] = pd.to_datetime(df["start_time"])
-    df["end_time"] = pd.to_datetime(df["end_time"])
-    df["date"] = df["start_time"].dt.date
-    df["start_hour"] = df["start_time"].dt.hour
-    df["end_hour"] = df["end_time"].dt.hour
-
     df_sel = df[df.user_id == uid]
+    df_sel["start_time"] = pd.to_datetime(df_sel["start_time"])
+    df_sel["end_time"] = pd.to_datetime(df_sel["end_time"])
+    df_sel["date"] = df_sel["start_time"].dt.date
     df_sel = df_sel[df_sel["date"] == date.fromisoformat(picked_date)]
+
+    df_sel["start_hour"] = df_sel["start_time"].dt.hour
+    df_sel["end_hour"] = df_sel["end_time"].dt.hour
+
     df_sel = df_sel[df_sel["start_hour"].isin(picked_hours)]
-    df_sel = df_sel[df_sel["end_hour"].isin(picked_hours)]
+    # df_sel = df_sel[df_sel["end_hour"].isin(picked_hours)]
 
     fig = px.timeline(
         df_sel, 
