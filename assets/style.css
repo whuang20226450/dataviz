@@ -12,6 +12,10 @@
     
     height: 35px;
 }
+.SingleDatePickerInput__withBorder {
+    /* border-radius: 20px; */
+    border: 2px solid #929292 !important;
+}
 
 .popover {
     max-width: 500px;
