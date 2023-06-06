@@ -22,6 +22,7 @@ layout = dbc.Container([
                     html.Header(
                         style={'color':'#7FDBFF'},
                     ),
+                    html.H4("warning: still under development"),
                     html.Div(
                                     [
                                         dbc.Label("Date to show: ", style={'font-weight': 'bold',

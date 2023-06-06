@@ -1,0 +1,19 @@
+,start_time,end_time,activity_name
+0,00:00,06:00,Sleep
+1,                    06:00,07:00,Morning Routine
+2,                    07:00,08:00,Exercise
+3,                    08:00,08:30,Breakfast
+4,                    08:30,09:30,Planning/Organization
+5,                    09:30,10:00,Break
+6,                    10:00,12:00,Work
+7,                    12:00,13:00,Lunch
+8,                    13:00,15:00,Work
+9,                    15:00,15:30,Break
+10,                    15:30,17:30,Work
+11,                    17:30,18:00,Break
+12,                    18:00,19:00,Personal Development
+13,                    19:00,20:00,Dinner
+14,                    20:00,21:00,Relaxation
+15,                    21:00,22:00,Hobby/Leisure Activity
+16,                    22:00,23:00,Preparation for Bedtime
+17,                    23:00,23:59,Relaxation/Self-Care

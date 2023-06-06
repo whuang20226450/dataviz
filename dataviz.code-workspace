@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../DataViz Project/dataviz"
+		},
+		{
+			"path": "../DataViz Project/dataviz_heroku"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "dataviz"
+	}
+}
