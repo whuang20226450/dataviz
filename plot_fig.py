@@ -242,7 +242,7 @@ def activity_analysis_plot(comparison_type, start_date, value):
     new_df = pd.DataFrame({'Activity Type': activity_percentages.index, 'Percentage': activity_percentages.values})
 
     # fig1
-    fig1 = go.Figure(data=[go.Pie(labels=new_df["Activity Type"], values=new_df["Percentage"], pull=[0.2, 0, 0, 0, 0, 0])])
+    fig1 = go.Figure(data=[go.Pie(labels=new_df["Activity Type"], values=new_df["Percentage"], pull=[0, 0, 0, 0, 0, 0], textposition='inside',)])
 
     m1, m2 = 50, 80
     btn_list = []
@@ -255,7 +255,7 @@ def activity_analysis_plot(comparison_type, start_date, value):
                         'labels': [new_df['Activity Type']], 
                         'values': [new_df['Percentage']],
                         'pull': [[0.2 if i == idx else 0. for i in range(len(new_df['Activity Type']))]], 
-                        'title': f'{new_df["Activity Type"]} highlighted',
+                        'title': f'{activity} highlighted',
                     },
                     {'margin': dict(t=m1, b=m1, l=m1, r=m1)}
                 ],
