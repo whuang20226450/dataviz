@@ -98,7 +98,7 @@ layout = dbc.Container([
                                             id='startDate-select',
                                             min_date_allowed=date(2018, 1, 5),
                                             max_date_allowed=date(2023, 9, 19),
-                                            initial_visible_month=date(2019, 4, 1),
+                                            initial_visible_month=date(2019, 5, 8),
                                             date=date(2019, 4, 28),
                                         ),
                                     ],
