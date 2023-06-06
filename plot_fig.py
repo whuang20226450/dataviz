@@ -47,6 +47,17 @@ df_fake2 = pd.DataFrame(data={'stress': stress_fake, 'attention': attention_fake
 #-------------------------------------------------------------fake data--------------------------------------------------#
 
 
+color_map = ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"]
+activity2color = {
+    "rest": color_map[0],
+    "social": color_map[1],
+    "entertainment": color_map[2],
+    "other": color_map[3],
+    "exercise": color_map[4],
+    "work": color_map[6],
+}
+
+
 def plot_main(graph_type, comparison_type, start_date, user):
     # print(user)
     if graph_type == "Weekly Productivity":
@@ -352,6 +363,8 @@ def activity_analysis_plot(comparison_type, start_date, value):
     # fig1
     fig1 = go.Figure(data=[go.Pie(labels=sel["activity_type"], values=sel["duration"], pull=[0, 0, 0, 0, 0, 0], textposition= "inside")])
     # fig1 = go.Figure(data=[go.Pie(labels=new_df["Activity Type"], values=new_df["Percentage"], pull=[0, 0, 0, 0, 0, 0], textposition='inside',)])
+
+    fig1.update_traces(marker = dict(colors = [activity2color[activ] for activ in sel["activity_type"]]))
 
     m1, m2 = 50, 80
     btn_list = []
