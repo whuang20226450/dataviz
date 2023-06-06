@@ -86,15 +86,17 @@ def get_prod(df):
     if out == 0:
         return 0 
     else:
-        return np.log(1 + (600 / out.total_seconds()))
+        return np.log(1 + (600 / ( 10 + out.total_seconds())))
+        # return 1/out.total_seconds()
 
 # Note: somehow the end is included for df.loc[], eg. df.loc[:6] -> row 0~6 are included
 def weekly_productivity_plot(comparison_type, start_date, value):
     fig=go.Figure()
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    df = pd.read_csv(dir_path + '/pages/data/' + 'processed_data_v2.csv')
-    df["start_time"] = pd.to_datetime(df["start_time"])
+    data = pd.read_csv(dir_path + '/pages/data/' + 'processed_data_v2.csv')
+    df = data.copy()
+    df["start_time"] = pd.to_datetime(data["start_time"])
     df["end_time"] = pd.to_datetime(df["end_time"])
     df["date"] = df["start_time"].dt.date
     df = df[df.user_id == value]
@@ -102,17 +104,70 @@ def weekly_productivity_plot(comparison_type, start_date, value):
     # df = df[:7]
 
     productivities = {}
+    avg_prod = {}
     # print(sorted(list(set(df.date))))
+    users = list(set(data["user_id"]))
 
     for date in sorted(list(set(df.date))):
         productivities[date] = get_prod(df[df["date"] == date])
 
+        # user_prods = []
+        # for user in users:
+        #     df = data.copy()
+        #     df["start_time"] = pd.to_datetime(data["start_time"])
+        #     df["end_time"] = pd.to_datetime(df["end_time"])
+        #     df["date"] = df["start_time"].dt.date
+        #     df = df[df.user_id == user]
+        #     df = df[df["date"] >= date]
+        #     if len(df) == 0:
+        #         continue
+        #     user_prod = get_prod(df[df["date"] == date])
+        #     user_prods.append(user_prod)
+        # # print(user_prods)
+        # avg_prod[date] = np.mean(user_prods)
+
     # print(productivities)
+
+    #all users
+    
+    # user_prod = {user: dict() for user in users}
+    # for user in users:
+    #         df = data.copy()
+    #         df["start_time"] = pd.to_datetime(data["start_time"])
+    #         df["end_time"] = pd.to_datetime(df["end_time"])
+    #         df["date"] = df["start_time"].dt.date
+    #         df = df[df.user_id == user]
+    #         df = df[df["date"] >= start_date]
+
+    #         product_user = {}
+    #         for date in sorted(list(set(df.date))):
+    #             product_user[date] = get_prod(df[df["date"] == date])
+            
+    #         user_prod[user] = product_user
+
+
+    # print(user_prod)
+
+    others = pd.read_csv(dir_path + '/pages/data/' + 'dataAVG_prod.csv')
+    # print(others.head())
+    # df["start_time"] = pd.to_datetime(data["start_time"])
+    # df["end_time"] = pd.to_datetime(df["end_time"])
+    # print(others.columns)
+    others["Date"] = pd.to_datetime(others["Date"])
     
     fig.add_traces(go.Bar(name='Self', x=list(productivities.keys()), y=list(productivities.values()), marker_color='#66C5CC'))
-    if comparison_type != 'Self':
+    if comparison_type == "All users":
         # fig.add_traces(go.Bar(name=comparison_type, x=df.week_day, y=df.loc[:6].productivity_other, marker_color='#F6CF71'))
-        fig.add_traces(go.Bar(name=comparison_type, x=list(productivities.keys()), y=list(productivities.values()), marker_color='#F6CF71'))
+        sel = others[others.Date.isin(list(productivities.keys()))]
+        # print(sel.head())
+        fig.add_traces(go.Bar(name=comparison_type, x=list(sel["Date"]), y=list(sel["avg_prod_all"]), marker_color='#F6CF71'))
+    if comparison_type == "Best users":
+        # sel = [others[i] if others.Date[i] in productivities.keys()]
+        sel = others[others.Date.isin(list(productivities.keys()))]
+        fig.add_traces(go.Bar(name=comparison_type, x=list(sel["Date"]), y=list(sel["avg_prod_top"]), marker_color='#F6CF71'))
+    if comparison_type == "Worst users":
+        sel = others[others.Date.isin(list(productivities.keys()))]
+        fig.add_traces(go.Bar(name=comparison_type, x=list(sel["Date"]), y=list(sel["avg_prod_bot"]), marker_color='#F6CF71'))
 
     fig.update_layout(
         title=f'<B>Weekly Productivity</B> compared with {comparison_type} starting from {start_date}',
@@ -135,7 +190,7 @@ def weekly_productivity_plot(comparison_type, start_date, value):
 
     if comparison_type == 'Self':
         fig.update_layout(
-            title=f'<B>Weekly Productivity</B> starting from {start_date}',
+            title=f'<B>Weekly Productivity</B> starting from {min(list(productivities.keys()))}',
         )
     return fig
 
@@ -153,16 +208,33 @@ def monthly_productivity_plot(comparison_type, start_date, value):
     productivities = {}
     # print(sorted(list(set(df.date))))
 
+    others = pd.read_csv(dir_path + '/pages/data/' + 'dataAVG_prod.csv')
+    # print(others.columns)
+    others["Date"] = pd.to_datetime(others["Date"])
+
     for date in sorted(list(set(df.date))):
         productivities[date] = get_prod(df[df["date"] == date])
 
     fig1 = calendar_heatmap(list(productivities.values()), min(productivities.keys()), 
         f'<B>Monthly Productivity</B> from {str(start_date)}')
 
+
     # fig2 = calendar_heatmap(df.productivity_diff.values.tolist(), start_date, 
     #     f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
-    fig2 = calendar_heatmap(list(productivities.values()), min(productivities.keys()), 
+    if comparison_type == "All users":
+        fig2 = calendar_heatmap(list(others.avg_prod_all), min(others.Date), 
         f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
+    elif comparison_type == "Best users":
+        fig2 = calendar_heatmap(list(others.avg_prod_top), min(others.Date), 
+        f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
+    elif comparison_type == "Worst users":
+        fig2 = calendar_heatmap(list(others.avg_prod_bot), min(others.Date), 
+        f'<B>Productivity Difference</B> between user and {comparison_type} <Br>starting from {str(start_date)}')
+    else:
+        fig2 = None
+
+
+    
 
     return fig1, fig2
 
@@ -221,6 +293,30 @@ def calendar_heatmap(data, start_date, title):
     return fig
 
 
+def details_activity_type(user, day, activity_type, user_df):
+  # filtering by user and activity
+  user_df.user_id = user_df.user_id.astype(str)
+  user_df = user_df[user_df.user_id == user]
+  user_activity_df = user_df[user_df['activity_type'] == activity_type]
+
+  # turing timestamps to datetime
+  user_activity_df.start_time = pd.to_datetime(user_activity_df.start_time)
+  user_activity_df.end_time = pd.to_datetime(user_activity_df.end_time)
+
+  # finding the total duration
+  user_activity_df['day'] = user_activity_df['start_time'].dt.day
+  user_activity_df['duration'] = user_activity_df.end_time - user_activity_df.start_time
+
+  user_activity_df.drop(['activity_type', 'start_time', 'end_time', 'Unnamed: 0', "user_id"], axis=1, inplace=True)
+  user_activity_day_df = user_activity_df[user_activity_df.day == day]
+
+  user_activity_df = user_activity_day_df.groupby('name')['duration'].sum().reset_index()
+  total_time = user_activity_df['duration'].sum()
+  user_activity_df['duration'] = (user_activity_df['duration']/total_time)*100
+
+  return user_activity_df
+
+
 def activity_analysis_plot(comparison_type, start_date, value):
     
     # activity_type = df.activity_type
@@ -230,46 +326,54 @@ def activity_analysis_plot(comparison_type, start_date, value):
     # activity_detail_time_fake = df2.activity_detail_time
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    activity_df = pd.read_csv(dir_path + '/pages/data/' + 'processed_data_v2.csv')
-    activity_df["start_time"] = pd.to_datetime(activity_df["start_time"])
-    activity_df["date"] = activity_df["start_time"].dt.date
-    activity_df = activity_df[activity_df.user_id == value]
-    activity_df = activity_df[activity_df["date"] == start_date]
-    activity_counts = activity_df['activity_type'].value_counts()
+    user = str(value)
+    # print(user)
+    activity_df = pd.read_csv(dir_path + r'/pages/data/' + r'activ_data/'+f"{user}.csv")
+    df2 = pd.read_csv(dir_path + '/pages/data/' + 'processed_data_v2.csv')
+    # print(activity_df.head())
+    sel = activity_df[activity_df["day"] == start_date.day]
+    # print(sel)
 
-    activity_percentages = activity_counts / len(activity_df) * 100
 
-    new_df = pd.DataFrame({'Activity Type': activity_percentages.index, 'Percentage': activity_percentages.values})
+    # new_df = pd.DataFrame({'Activity Type': activity_percentages.index, 'Percentage': activity_percentages.values})
 
     # fig1
-    fig1 = go.Figure(data=[go.Pie(labels=new_df["Activity Type"], values=new_df["Percentage"], pull=[0.2, 0, 0, 0, 0, 0])])
+    fig1 = go.Figure(data=[go.Pie(labels=sel["activity_type"], values=sel["duration"], pull=[0, 0, 0, 0, 0, 0], textposition= "inside")])
 
     m1, m2 = 50, 80
     btn_list = []
-    for idx, activity in enumerate(new_df['Activity Type']):
+    # activity_time = None #TODO
+    for idx, activity in enumerate(list(sel["activity_type"])):
+        extra = details_activity_type(value, start_date.day, activity.lower(), df2)
+        # print(activity)
+        # print(list(extra["name"]))
+        # print(list(extra["duration"]))
+        # print()
         btn_list.append(
             dict(label = activity, method = 'update',
                 # in args and args2, the first dict is for go.Pie, and the sec dict is for go.Figure (I guess)
                 args = [
                     {
-                        'labels': [new_df['Activity Type']], 
-                        'values': [new_df['Percentage']],
-                        'pull': [[0.2 if i == idx else 0. for i in range(len(new_df['Activity Type']))]], 
-                        'title': f'{new_df["Activity Type"]} highlighted',
+                        'labels': [list(sel["activity_type"])], 
+                        'values': [list(sel["duration"])],
+                        'pull': [[0.2 if i == idx else 0. for i in range(len(sel["activity_type"]))]], 
+                        'title': f'{activity} highlighted',
                     },
                     {'margin': dict(t=m1, b=m1, l=m1, r=m1)}
                 ],
                 args2 = [
                     {
-                        'labels': [activity_df[activity_df["activity_type"] == activity].name], 
-                        'values': [5 for _ in range(len([activity_df[activity_df["activity_type"] == activity]]))], 
-                        'pull': [[0. for i in range(len([activity_df[activity_df["activity_type"] == activity]]))]],
+                        'labels': [list(extra["name"])], 
+                        'values': [list(extra["duration"])], 
+                        'pull': [[0. for i in range(len(list(extra["name"])))]],
                         'title': f'{activity} detail',
                     }, 
                     {'margin': dict(t=m2, b=m2, l=m2, r=m2*1.9)}
                 ],
             ),
         )
+
+    # print(btn_list)
 
     fig1.update_layout(
         updatemenus = list([dict(
