@@ -141,16 +141,16 @@ layout = dbc.Container([
                     ),
 
                     # inference
-                    dbc.Row(
-                        html.Div(
-                            [
-                                html.H4("Inference", className="mt-3"),
-                            ] + inferences_dash_list,
-                        ),
-                        style={"background-color": "rgb(173, 181, 189)", 'border-radius': '5px', },
-                        className="text-white"
-                    ),
-                    dbc.Row(style={"height": "5vh"},)
+                    # dbc.Row(
+                    #     html.Div(
+                    #         [
+                    #             html.H4("Inference", className="mt-3"),
+                    #         ] + inferences_dash_list,
+                    #     ),
+                    #     style={"background-color": "rgb(173, 181, 189)", 'border-radius': '5px', },
+                    #     className="text-white"
+                    # ),
+                    # dbc.Row(style={"height": "5vh"},)
                 ]
             ),
         ],

@@ -416,7 +416,7 @@ def activity_analysis_plot(comparison_type, start_date, value):
         linewidth=1,        # axis thickness
     )
     fig2.update_yaxes(
-        title_text="Productivity",
+        title_text="Hours",
         ticks='outside',
         showline=True,
         linecolor='black',
