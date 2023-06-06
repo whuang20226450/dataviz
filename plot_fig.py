@@ -339,6 +339,7 @@ def activity_analysis_plot(comparison_type, start_date, value):
 
     # fig1
     fig1 = go.Figure(data=[go.Pie(labels=sel["activity_type"], values=sel["duration"], pull=[0, 0, 0, 0, 0, 0], textposition= "inside")])
+    # fig1 = go.Figure(data=[go.Pie(labels=new_df["Activity Type"], values=new_df["Percentage"], pull=[0, 0, 0, 0, 0, 0], textposition='inside',)])
 
     m1, m2 = 50, 80
     btn_list = []
