@@ -322,7 +322,7 @@ def update_chatgpt(n_clicks, desires):
         return fig
     
     optional = f"Also, please consider that {desires}" if desires != None else ""
-    prompt = [{"role": "user", "content": f"My current schedule is [{df2txt(schedule)}]. Please provide a csv string with a new schedule consisting of three columns: start time, end time and name of activity, which would help improve my productivity and overall well-being. However, all activities from my schedule must remain in the new schedule. Only this csv string should be the output. IF you think there is not enough information provided, then give a generic schedule that you think works best. Activities must begin at 00:00 and end at 23:59." + optional}]
+    prompt = [{"role": "user", "content": f"My current schedule is [{df2txt(schedule)}]. Please provide a csv string with a new schedule consisting of three columns: start time, end time and name of activity, which would help improve my productivity and overall well-being. However, all activities from my schedule must remain in the new schedule, possible with changed start or end times. Only this csv string should be the output. IF you think there is not enough information provided, then give a generic schedule that you think works best. Activities must begin at 00:00 and end at 23:59." + optional}]
 
     user_prompt = init_prompt + prompt
     # gpt_schedule = pd.DataFrame(columns = ["start_time", "end_time", "activity_name"])

@@ -212,8 +212,20 @@ def monthly_productivity_plot(comparison_type, start_date, value):
     # print(others.columns)
     others["Date"] = pd.to_datetime(others["Date"])
 
+
     for date in sorted(list(set(df.date))):
         productivities[date] = get_prod(df[df["date"] == date])
+
+    mmax = max(list(productivities.keys()))
+    mmin = min(list(productivities.keys()))
+
+    for i in range(5):
+        productivities[mmax + datetime.timedelta(days=i)] = 0
+        productivities[mmin - datetime.timedelta(days=i)] = 0
+
+    # argg = list(productivities.values())
+    # argg = argg + [min(list(productivities.values())) - datetime.timedelta(days=i) for i in range(5)]
+    # argg = argg + [max(list(productivities.values())) + datetime.timedelta(days=i) for i in range(5)]
 
     fig1 = calendar_heatmap(list(productivities.values()), min(productivities.keys()), 
         f'<B>Monthly Productivity</B> from {str(start_date)}')
