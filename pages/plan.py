@@ -86,43 +86,63 @@ layout = dbc.Container([html.Div(id = "planning",
                                 width=2,
                             ),
                             dbc.Col(
-                                html.Div(
-                                    [
-                                        dbc.Label("Start time", style={'font-weight': 'bold'}, id = "start_label"),
-                                        html.Br(),
-                                        dcc.Input(type="time", step="600", id = "start_time"),
-                                    ]
-                                ),
-                                width=1,
+                                [
+                                    dbc.Stack(
+                                        [
+                                            html.Div(
+                                                [
+                                                    dbc.Label("Start time: ", style={'font-weight': 'bold'}, id = "start_label"),
+                                                    html.Br(),
+                                                    dcc.Input(type="time", step="600", id = "start_time")
+                                                ],
+                                            ),
+                                            html.Div(
+                                                [
+                                                    dbc.Label("End time: ", style={'font-weight': 'bold'}, id = "end_label"),
+                                                    html.Br(),
+                                                    dcc.Input(type="time", step="600", id = "end_time"),
+                                                ],
+                                            ),
+                                            html.Div(
+                                                [
+                                                    dbc.Label("   ", style={'font-weight': 'bold'}, id = "empty", hidden = False),
+                                                    html.Br(),
+                                                    html.Button('Add', id='add-but', n_clicks=0, 
+                                                                style={'font-size': '14px', 
+                                                                    'width': '80px', 
+                                                                    'font-weight': 'bold',
+                                                                    'display': 'inline-block', 
+                                                                    'margin-bottom': '10px', 
+                                                                    'margin-top': '19px', 
+                                                                    'height':'28px', 
+                                                                    'verticalAlign': 'bottom'}),
+                                                ],
+                                            ),
+                                        ],
+                                        direction="horizontal",
+                                        gap=3,
+                                    ),
+                                ],
+                                width=6,
                             ),
-                            dbc.Col(
-                                html.Div(
-                                    [
-                                        dbc.Label("End time", style={'font-weight': 'bold'}, id = "end_label"),
-                                        html.Br(),
-                                        dcc.Input(type="time", step="600", id = "end_time"),
-                                    ]
-                                ),
-                                width=1,
-                            ),
-                            dbc.Col(
-                                html.Div(
-                                    [
-                                        dbc.Label("   ", style={'font-weight': 'bold'}, id = "empty", hidden = False),
-                                        html.Br(),
-                                        html.Button('Add', id='add-but', n_clicks=0, 
-                                                    style={'font-size': '14px', 
-                                                           'width': '140px', 
-                                                           'font-weight': 'bold',
-                                                           'display': 'inline-block', 
-                                                           'margin-bottom': '10px', 
-                                                           'margin-right': '5px', 
-                                                           'height':'32px', 
-                                                           'verticalAlign': 'bottom'}),
-                                    ]
-                                ),
-                                width=3,
-                            ),
+                            # dbc.Col(
+                            #     html.Div(
+                            #         [
+                            #             dbc.Label("   ", style={'font-weight': 'bold'}, id = "empty", hidden = False),
+                            #             html.Br(),
+                            #             html.Button('Add', id='add-but', n_clicks=0, 
+                            #                         style={'font-size': '14px', 
+                            #                                'width': '140px', 
+                            #                                'font-weight': 'bold',
+                            #                                'display': 'inline-block', 
+                            #                                'margin-bottom': '10px', 
+                            #                                'margin-right': '5px', 
+                            #                                'height':'32px', 
+                            #                                'verticalAlign': 'bottom'}),
+                            #         ]
+                            #     ),
+                            #     width=3,
+                            # ),
 
 
                         ],
