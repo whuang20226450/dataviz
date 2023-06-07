@@ -1,18 +1,17 @@
 ,start_time,end_time,activity_name
 0,00:00,08:00,Sleep
-1,                    08:00,09:00,Morning Routine
-2,                    09:00,10:00,Exercise
-3,                    10:00,10:15,Break
-4,                    10:15,11:15,DataViz Homework
-5,                    11:15,11:30,Break
-6,                    11:30,12:30,Work
-7,                    12:30,13:00,Lunch
-8,                    13:00,15:00,DataViz Homework
-9,                    15:00,15:30,Break
-10,                    15:30,17:30,Work
-11,                    17:30,19:00,Netflix
-12,                    19:00,20:00,Dinner
-13,                    20:00,22:00,League of Legends
-14,                    22:00,22:30,Personal Development
-15,                    22:30,23:30,Relaxation
-16,                    23:30,23:59,Preparation for Bedtime
+1,                    08:00,08:30,Morning Routine
+2,                    08:30,09:30,Exercise
+3,                    09:30,10:00,Breakfast
+4,                    10:00,12:00,Homework
+5,                    12:00,13:00,Lunch
+6,                    13:00,15:00,Work/Study
+7,                    15:00,15:30,Break
+8,                    15:30,17:30,Work/Study
+9,                    17:30,18:00,Break
+10,                    18:00,19:00,Personal Development
+11,                    19:00,20:00,Dinner
+12,                    20:00,21:00,Leisure Activity (Netflix
+13,                    21:00,22:00,Hobby/Leisure Activity
+14,                    22:00,23:00,Preparation for Bedtime
+15,                    23:00,23:59,Relaxation/Self-Care

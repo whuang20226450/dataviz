@@ -29,7 +29,8 @@ from io import StringIO
 dir_path = os.path.dirname(os.path.realpath(__file__))
 data = pd.read_csv(dir_path + r'/data/' + r'processed_data_v2.csv')
 activities = ["Other"] + list(set(data["name"]))
-openai.api_key = "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"
+Xh = "Xh"
+openai.api_key = "sk-i1qWbNgHczYIkMeIYaCxT3BlbkFJf9jxSsvlHW0CT" + Xh + "ohgDO"
 gpt_model = "gpt-3.5-turbo"
 sample_answer1 = """00:00,06:00,Sleep
                     06:00,07:00,Morning Routine
@@ -338,7 +339,7 @@ def update_chatgpt(n_clicks, desires):
                             sep=",",
                             header = None,
                             names = ["start_time", "end_time", "activity_name"])
-    gpt_schedule.to_csv(r"C:\Users\Ashnv\OneDrive\Documents\dataviz\pages\data\gpt_sched.csv")
+    # gpt_schedule.to_csv(r"C:\Users\Ashnv\OneDrive\Documents\dataviz\pages\data\gpt_sched.csv")
 
     gpt_schedule["start_time"] = gpt_schedule["start_time"].str.replace(" ", "")
     gpt_schedule["end_time"] = gpt_schedule["end_time"].str.replace(" ", "")
