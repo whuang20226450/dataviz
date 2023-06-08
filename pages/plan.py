@@ -15,6 +15,10 @@ import numpy as np
 import plotly.graph_objects as go
 import openai
 from io import StringIO
+# from boto.s3.connection import S3Connection
+import os
+
+# openai.api_key = os.getenv("KEY")
 
 
 
@@ -29,7 +33,7 @@ from io import StringIO
 dir_path = os.path.dirname(os.path.realpath(__file__))
 data = pd.read_csv(dir_path + r'/data/' + r'processed_data_v2.csv')
 activities = ["Other"] + list(set(data["name"]))
-
+openai.api_key = os.getenv("KEY")
 gpt_model = "gpt-3.5-turbo"
 sample_answer1 = """00:00,06:00,Sleep
                     06:00,07:00,Morning Routine
@@ -50,7 +54,7 @@ sample_answer1 = """00:00,06:00,Sleep
                     22:00,23:00,Preparation for Bedtime
                     23:00,23:59,Relaxation/Self-Care"""
 
-master_messages = [{"role": "system", "content": "Your only job is to generate schedule suggestions for someone who whishes to stay productive, as well as to improve his well-being by having a well-organized schedule. All of your answers must be in a format of a csv string with three columns, corresponding to start and end times of activities as well as activity names. Your answer can contain nothing but this csv string with 3 columns. You are not allowed to give comments or anything that is different from a csv string. If there's not enough information, then provide a generic schedule that you think works best. Activities must begin at 00:00 and end at 23:59."}]
+master_messages = [{"role": "system", "content": "Your only job is to generate schedule suggestions for someone who wishes to stay productive, as well as to improve his well-being by having a well-organized schedule. All of your answers must be in a format of a csv string with three columns, corresponding to start and end times of activities as well as activity names. Your answer can contain nothing but this csv string with 3 columns. You are not allowed to give comments or anything that is different from a csv string. If there's not enough information, then provide a generic schedule that you think works best. Activities must begin at 00:00 and end at 23:59."}]
 assistant_messages = [{"role": "assistant", "content": sample_answer1}]
 # user_messages = [{"role": "user", "content": "My current schedule is [00:00 - 09:00 : Sleep; 09:00 - 11:00 - Breakfast; 11:00 - 12:30 - Lunch; 12:30 - 19:30 - Studies; 9:30 - 24:00 - Partying with friends]. Provide a csv string with a new schedule which would help improve my productivity and overall well-being. Only this csv string should be the output. While you should make some improvements, you are not allowed to completely erase this schedule."}]
 init_prompt = master_messages + assistant_messages
