@@ -33,6 +33,7 @@ kiwisolver==1.4.4
 MarkupSafe==2.1.1
 matplotlib==3.4.3
 multidict==6.0.2
+mkl-service==2.4.0
 numexpr==2.8.4
 numpy==1.23.5
 openai==0.27.7
