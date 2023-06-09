@@ -183,6 +183,7 @@ layout = dbc.Container([html.Div(id = "planning",
                     ),
                     html.Br(),
                     html.H4("Schedule suggested by ChatGPT:"),
+                    dbc.Label("Important: it is a limitation of OpenAI API that each request takes 15-20 seconds. Please wait after clicking button Add above."),
                     dbc.Row(
                         [
                             dbc.Col(

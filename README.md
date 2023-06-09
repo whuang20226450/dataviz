@@ -1,6 +1,8 @@
 # Tempus
 
-This depository contains the project for CS481 Dava Visualization course offered at KAIST in Spring 2023.
+This depository contains the project for CS481 Dava Visualization course offered at KAIST in Spring 2023. 
+
+Important: IN the planning page, requests to ChatGPT take 15-20 to process. This limitation is entirely due to OpenAI API and there's little that can be done here. Also, the code was tested on VM running windows. It is not guaranteed to run correctly on UNIX-based OS.
 
 ## Members - [Group 2] Team 4 - Tempus
 - ChinWei Huang
